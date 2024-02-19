@@ -1,15 +1,14 @@
 import React from "react";
 import { useTheme } from "next-themes";
 import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
-import { IconButton, Tooltip } from "@radix-ui/themes";
+import { IconButton } from "@radix-ui/themes";
 import Head from "next/head";
-import { useCssLibPreference } from "./CssLibPreference";
 
 export const ThemeToggle = () => {
   const { theme, systemTheme, setTheme } = useTheme();
 
   return (
-    <>
+    <div>
       <Head>
         <style>{`
         :root, .light, .light-theme {
@@ -46,6 +45,6 @@ export const ThemeToggle = () => {
           style={{ display: "var(--theme-toggle-moon-icon-display)" }}
         />
       </IconButton>
-    </>
+    </div>
   );
 };
