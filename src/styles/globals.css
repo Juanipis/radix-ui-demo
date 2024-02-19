@@ -31,3 +31,19 @@ body {
     text-wrap: balance;
   }
 }
+
+/* AccentColorPicker.module.css */
+.accent-radio {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.accent-radio:not(:last-child) {
+  margin-bottom: 16px;
+}
+
+.radio-indicator {
+  /* Styles for the radio indicator */
+}

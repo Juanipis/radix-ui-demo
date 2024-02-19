@@ -3,11 +3,15 @@ import { useLayoutEffect } from "@radix-ui/react-use-layout-effect";
 import { DEFAULT_CSS_LIB, SUPPORTED_CSS_LIBS } from "./constants";
 import type { CssLib } from "./constants";
 
-const LOCAL_STORAGE_KEY = "@radix-ui/css-lib";
+const LOCAL_STORAGE_CSS_LIB_KEY = "@radix-ui/css-lib";
+const LOCAL_STORAGE_ACCENT_COLOR_KEY = "@radix-ui/accent-color";
 
+// Extending the context value type to include accent color preferences
 type CssLibPreferenceContextValue = {
   preferredCssLib: CssLib;
   setPreferredCssLib: (lib: CssLib) => void;
+  accentColor: string; // Add accent color to the context
+  setAccentColor: (color: string) => void; // Add a setter for the accent color
 };
 
 const CssLibPreferenceContext =
@@ -18,28 +22,45 @@ const CssLibPreferenceProvider: React.FC<{ children?: React.ReactNode }> = ({
 }) => {
   const [preferredCssLib, setPreferredCssLib] =
     React.useState<CssLib>(DEFAULT_CSS_LIB);
+  const [accentColor, setAccentColor] = React.useState<string>("crimson"); // Default accent color
 
   const savePreferredCssLib = React.useCallback((lib: unknown) => {
     if (isValidCssLib(lib)) {
       setPreferredCssLib(lib);
-      setLocalStorageCssLib(lib);
+      setLocalStorageItem(LOCAL_STORAGE_CSS_LIB_KEY, lib);
     } else {
       setPreferredCssLib(DEFAULT_CSS_LIB);
-      setLocalStorageCssLib(DEFAULT_CSS_LIB);
+      setLocalStorageItem(LOCAL_STORAGE_CSS_LIB_KEY, DEFAULT_CSS_LIB);
     }
   }, []);
 
+  const saveAccentColor = React.useCallback((color: string) => {
+    setAccentColor(color);
+    setLocalStorageItem(LOCAL_STORAGE_ACCENT_COLOR_KEY, color);
+  }, []);
+
   useLayoutEffect(() => {
-    const localStorageCssLib = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+    const localStorageCssLib = window.localStorage.getItem(
+      LOCAL_STORAGE_CSS_LIB_KEY
+    );
     savePreferredCssLib(localStorageCssLib);
+
+    const localStorageAccentColor = window.localStorage.getItem(
+      LOCAL_STORAGE_ACCENT_COLOR_KEY
+    );
+    if (localStorageAccentColor) {
+      setAccentColor(localStorageAccentColor);
+    }
   }, [savePreferredCssLib]);
 
   const contextValue = React.useMemo(
     () => ({
-      preferredCssLib: preferredCssLib,
+      preferredCssLib,
       setPreferredCssLib: savePreferredCssLib,
+      accentColor, // Provide accent color in context
+      setAccentColor: saveAccentColor, // Provide method to update accent color
     }),
-    [preferredCssLib, savePreferredCssLib]
+    [preferredCssLib, savePreferredCssLib, accentColor, saveAccentColor]
   );
 
   return (
@@ -49,6 +70,13 @@ const CssLibPreferenceProvider: React.FC<{ children?: React.ReactNode }> = ({
   );
 };
 
+function setLocalStorageItem(key: string, value: string) {
+  window.localStorage.setItem(key, value);
+}
+
+const isValidCssLib = (lib: unknown): lib is CssLib =>
+  SUPPORTED_CSS_LIBS.includes(lib as CssLib);
+
 const useCssLibPreference = () => {
   const context = React.useContext(CssLibPreferenceContext);
   if (!context) {
@@ -56,15 +84,7 @@ const useCssLibPreference = () => {
       "`useCssLibPreference` must be called from within a `CssLibPreferenceProvider`."
     );
   }
-  const { preferredCssLib, setPreferredCssLib } = context;
-  return [preferredCssLib, setPreferredCssLib] as const;
+  return context;
 };
 
-function setLocalStorageCssLib(lib: CssLib) {
-  window.localStorage.setItem(LOCAL_STORAGE_KEY, lib);
-}
-
-const isValidCssLib = (lib: unknown): lib is CssLib =>
-  SUPPORTED_CSS_LIBS.includes(lib as CssLib);
-
-export { CssLibPreferenceProvider, useCssLibPreference, isValidCssLib };
+export { CssLibPreferenceProvider, useCssLibPreference };
