@@ -23,6 +23,7 @@ const CssLibPreferenceProvider: React.FC<{ children?: React.ReactNode }> = ({
   const [preferredCssLib, setPreferredCssLib] =
     React.useState<CssLib>(DEFAULT_CSS_LIB);
   const [accentColor, setAccentColor] = React.useState<string>("crimson"); // Default accent color
+  const [loading, setLoading] = React.useState<boolean>(true); // Default accent color
 
   const savePreferredCssLib = React.useCallback((lib: unknown) => {
     if (isValidCssLib(lib)) {
@@ -51,6 +52,8 @@ const CssLibPreferenceProvider: React.FC<{ children?: React.ReactNode }> = ({
     if (localStorageAccentColor) {
       setAccentColor(localStorageAccentColor);
     }
+
+    setLoading(false); // Set loading to false after fetching from local storage
   }, [savePreferredCssLib]);
 
   const contextValue = React.useMemo(
@@ -62,6 +65,10 @@ const CssLibPreferenceProvider: React.FC<{ children?: React.ReactNode }> = ({
     }),
     [preferredCssLib, savePreferredCssLib, accentColor, saveAccentColor]
   );
+
+  if (loading) {
+    return;
+  }
 
   return (
     <CssLibPreferenceContext.Provider value={contextValue}>

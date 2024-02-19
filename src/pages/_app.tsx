@@ -11,16 +11,15 @@ import { useEffect } from "react";
 import { Theme } from "@radix-ui/themes";
 
 function Pages({ Component, pageProps }: AppProps) {
-  // Assuming your theme setup or global CSS can react to this variable
   const { accentColor } = useCssLibPreference();
 
   useEffect(() => {
-    // Apply the accent color as a CSS variable
     document.documentElement.style.setProperty("--accent-color", accentColor);
   }, [accentColor]);
 
   return (
     <Theme
+      // @ts-ignore
       accentColor={accentColor}
       grayColor="sand"
       radius="large"
